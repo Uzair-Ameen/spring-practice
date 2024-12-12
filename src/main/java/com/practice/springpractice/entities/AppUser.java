@@ -1,7 +1,9 @@
 package com.practice.springpractice.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,9 +13,9 @@ import java.util.UUID;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppUser {
-
-    public AppUser() {}
 
     public AppUser(String username, String password, String firstName, String lastName) {
         this.username = username;
@@ -48,5 +50,12 @@ public class AppUser {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         password = encoder.encode(password);
+    }
+
+    @Transient
+    public boolean isPasswordValid(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        return encoder.matches(password, this.password);
     }
 }
