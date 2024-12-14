@@ -9,7 +9,5 @@ import lombok.Data;
 public class AuthResponseDto {
 
     private String token;
-
-    private AppUser user;
 }
 

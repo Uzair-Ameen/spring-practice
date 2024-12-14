@@ -5,7 +5,6 @@ import com.practice.springpractice.dtos.UserDto;
 import com.practice.springpractice.entities.AppUser;
 import com.practice.springpractice.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +22,6 @@ public class UserController {
     }
 
     @GetMapping
-    @Secured("")
     public List<AppUser> testApi() {
         return this.userService.findAll();
     }
