@@ -41,9 +41,7 @@ public class AuthController {
 
     @PostMapping("login")
     public AuthResponseDto login(
-            @RequestBody LoginDto loginDto,
-            HttpServletRequest request,
-            HttpServletResponse reqponse
+            @RequestBody LoginDto loginDto
     ) {
         Authentication authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken.unauthenticated(loginDto.getUsername(), loginDto.getPassword())
