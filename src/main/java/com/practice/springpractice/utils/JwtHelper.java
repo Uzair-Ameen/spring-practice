@@ -40,8 +40,6 @@ public class JwtHelper {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        System.out.println(claims.toString());
-
         return claims.getSubject();
     }
 

@@ -5,6 +5,9 @@ import com.practice.springpractice.dtos.UserDto;
 import com.practice.springpractice.entities.AppUser;
 import com.practice.springpractice.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,16 +25,14 @@ public class UserController {
     }
 
     @GetMapping
+    @Secured("ROLE_ADMIN")
     public List<AppUser> testApi() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         return this.userService.findAll();
     }
 
-    @PostMapping
-    public AppUser addUser(
-            @RequestBody UserDto userDto
-    ) {
-        return this.userService.createUser(userDto);
-    }
+
 
     @DeleteMapping("{id}")
     public void deleteUser(@PathVariable("id") UUID id) {

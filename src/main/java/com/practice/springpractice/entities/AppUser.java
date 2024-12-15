@@ -1,36 +1,46 @@
 package com.practice.springpractice.entities;
 
+import com.practice.springpractice.dtos.UserDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUser implements UserDetails {
+public class AppUser extends TimeStamps implements UserDetails {
 
-    public AppUser(String username, String password, String firstName, String lastName) {
+    public AppUser(String username, String password, String firstName, String lastName, Role role) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
+    }
+
+    public AppUser(UserDto userDto, Role role) {
+        this(userDto.getUsername(), userDto.getPassword(), userDto.getFirstName(), userDto.getLastName(), role);
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(nullable = false)
+    private Role role;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -42,14 +52,6 @@ public class AppUser implements UserDetails {
     private String firstName;
 
     private String lastName;
-
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
-
-    @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
 
     @PrePersist
     public void hashPassword() {
@@ -67,7 +69,10 @@ public class AppUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
+
+        return List.of(authority);
     }
 
     @Override

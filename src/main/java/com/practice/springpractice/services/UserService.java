@@ -3,6 +3,9 @@ package com.practice.springpractice.services;
 
 import com.practice.springpractice.dtos.UserDto;
 import com.practice.springpractice.entities.AppUser;
+import com.practice.springpractice.entities.Role;
+import com.practice.springpractice.enums.RoleEnum;
+import com.practice.springpractice.repositories.RoleRepository;
 import com.practice.springpractice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -19,10 +22,12 @@ import java.util.UUID;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     /**
@@ -39,9 +44,10 @@ public class UserService implements UserDetailsService {
      * @return
      */
     public AppUser createUser(UserDto userDto) {
-        AppUser user = new AppUser(userDto.getUsername(), userDto.getPassword(), userDto.getFirstName(), userDto.getLastName());
 
-        System.out.println(user.getUsername() + " " + user.getPassword() + " " + user.getFirstName() + " " + user.getLastName() + " " + user.getCreatedAt());
+        Optional<Role> userRole =  roleRepository.findByName(RoleEnum.USER);
+
+        AppUser user = new AppUser(userDto, userRole.orElse(null));
 
         return userRepository.save(user);
     }
@@ -77,9 +83,17 @@ public class UserService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<AppUser> user = this.userRepository.findUserByUsername(username);
+        Optional<AppUser> appUser = this.userRepository.findUserByUsername(username);
 
-        return user.map(appUser -> User.builder().username(appUser.getUsername()).password(appUser.getPassword()).roles("USER").build()).orElse(null);
+        return appUser.map(
+                user ->
+                        User
+                                .builder()
+                                .username(user.getUsername())
+                                .password(user.getPassword())
+                                .authorities(user.getAuthorities())
+                                .build()
+        ).orElseThrow(() -> new UsernameNotFoundException(username));
 
     }
 }
